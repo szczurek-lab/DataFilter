@@ -38,7 +38,7 @@ DataFilter uses `conan` to manage dependencies and `cmake` to build the executab
    $ conan install .. -s build_type=Release --profile CONAN_PROFILE_FOR_CLANG --build=missing
    ```
 
-   `CONAN_PROFILE_FOR_CLANG` is the `conan` profile for clang. Please refer to the [official documentation](https://docs.conan.io/en/latest/reference/profiles.html) for more information.
+   `CONAN_PROFILE_FOR_CLANG` is the `conan` profile for clang. Please refer to the [official documentation of conan](https://docs.conan.io/en/latest/reference/profiles.html) for more information.
 
 3. Use `cmake` to build the executable:
 
@@ -49,7 +49,7 @@ DataFilter uses `conan` to manage dependencies and `cmake` to build the executab
     In case of using an undefault compiler, such as clang, on Linux, please use:
 
     ```shell
-    $ cmake -D CMAKE_C_COMPILER=CLANG_BIN -D CMAKE_CXX_COMPILER=CLANG++_BIN -D CMALE_BUILD_TYPE=Release ..; cmake --build .
+    $ cmake -D CMAKE_C_COMPILER=CLANG_BIN -D CMAKE_CXX_COMPILER=CLANG++_BIN -D CMAKE_BUILD_TYPE=Release ..; cmake --build .
     ```
 
     Where `CLANG_BIN` and `CLANG++_BIN` are the clang executables on your platform.
