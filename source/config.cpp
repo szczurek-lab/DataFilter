@@ -87,6 +87,8 @@ const std::string &Config::getExcludedMutatedSitesFileName() const { return excl
 
 const std::string &Config::getIncludedSitesFileName() const { return includedSitesFileName; }
 
+const std::string &Config::getIncludedMutatedSitesFileName() const { return includedMutatedSitesFileName; }
+
 const std::vector<std::string> &Config::getInputFileNames() const { return inputFileNames; }
 
 u_int64_t Config::getReadLength() const { return readLength; }
@@ -199,6 +201,11 @@ int parseCommandLineArgs(
       (
           "inc",
           boost::program_options::value<decltype(config.includedSitesFileName)>(&config.includedSitesFileName),
+          "File name of inclusion list (VCF format) containing Variants (CHROM, POS) that should be included."
+      )
+      (
+          "mi",
+          boost::program_options::value<decltype(config.includedMutatedSitesFileName)>(&config.includedMutatedSitesFileName),
           "File name of inclusion list (VCF format) containing Variants (CHROM, POS, REF, ALT) that should be included."
       )
       (

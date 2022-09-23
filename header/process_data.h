@@ -27,14 +27,14 @@ void readCellInformation(
 
 void readCellNames(const Config &, Data &);
 
-void readExclusionList(
+void readSpecialSites(
     const std::string &,
     std::set<std::pair<ChromosomeLabel, u_int32_t>> &
 );
 
 void readInclusionVCF(
     const std::string &,
-    std::set<std::tuple<ChromosomeLabel, u_int32_t, char, std::vector<char>>> &
+    std::set<std::tuple<ChromosomeLabel, u_int32_t, char, char>> &
 );
 
 std::vector<std::unique_ptr<ReadCountsFile>> getReadCountsFiles(const Config &);
@@ -173,7 +173,8 @@ void process_single_file(
     const u_int32_t &,
     const u_int32_t &,
     const std::set<std::pair<ChromosomeLabel, u_int32_t>> &,
-    const std::set<std::tuple<ChromosomeLabel, u_int32_t, char, std::vector<char>>> &,
+    const std::set<std::pair<ChromosomeLabel, u_int32_t>> &,
+    const std::set<std::tuple<ChromosomeLabel, u_int32_t, char, char>> &,
     std::mutex &,
     Data &
     );

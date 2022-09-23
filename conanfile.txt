@@ -1,0 +1,7 @@
+[requires]
+boost/1.79.0
+dlib/19.24
+zlib/1.2.12
+
+[generators]
+cmake

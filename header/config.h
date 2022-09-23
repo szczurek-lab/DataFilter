@@ -38,8 +38,12 @@ private:
   std::string excludedMutatedSitesFileName;
 
   // "inc"
-  // File name of inclusion list (VCF format) containing Variants (CHROM, POS, REF, ALT) that should be included.
+  // File name of inclusion list containing Variants (CHROM, POS) that should be included.
   std::string includedSitesFileName;
+
+  // "mi"
+  // File name of inclusion list (VCF format) containing Variants (CHROM, POS, REF, ALT) that should be included.
+  std::string includedMutatedSitesFileName;
 
   // Compressed mpileup files in `*.gz` format or uncompressed normal mpileup files.
   std::vector<std::string> inputFileNames;
@@ -180,6 +184,7 @@ public:
   [[nodiscard]] const std::string &getExcludedSitesFileName() const;
   [[nodiscard]] const std::string &getExcludedMutatedSitesFileName() const;
   [[nodiscard]] const std::string &getIncludedSitesFileName() const;
+  [[nodiscard]] const std::string &getIncludedMutatedSitesFileName() const;
   [[nodiscard]] const std::vector<std::string> &getInputFileNames() const;
   [[nodiscard]] u_int64_t getReadLength() const;
   [[nodiscard]] const std::filesystem::path &getOutputFileName() const;

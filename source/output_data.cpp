@@ -52,6 +52,8 @@ void SignificantAltNucs::addSigAltNuc(SignificantAltNuc &&v) { sigAltNucs.emplac
 
 void SignificantAltNucs::getOrderedSigAltNucs()
 {
+  if (this->sigAltNucs.empty()) return;
+
   std::sort(sigAltNucs.begin(), sigAltNucs.end(), std::greater<>());
 
   orderedSigAltNucs.resize(sigAltNucs.size());

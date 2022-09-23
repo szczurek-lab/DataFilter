@@ -48,17 +48,34 @@ void process_data(Config &config)
   // Get sites to skip.
   std::set<std::pair<ChromosomeLabel, u_int32_t>> exMap;
   if (!config.getExcludedSitesFileName().empty())
-    readExclusionList(config.getExcludedSitesFileName(), exMap);
+  {
+    std::cout << "> Reading sites to be excluded... ";
+    readSpecialSites(config.getExcludedSitesFileName(), exMap);
+    std::cout << "Done. " << exMap.size() << " sites will be excluded." << std::endl;
+  }
 
   // Get mutated sites to skip during the error rate estimation.
   std::set<std::pair<ChromosomeLabel, u_int32_t>> exMuMap;
   if (!config.getExcludedMutatedSitesFileName().empty())
-    readExclusionList(config.getExcludedMutatedSitesFileName(), exMuMap);
+  {
+    std::cout << "> Reading sites to be excluded... ";
+    readSpecialSites(config.getExcludedMutatedSitesFileName(), exMuMap);
+    std::cout << "Done. " << exMuMap.size() << " sites will be excluded." << std::endl;
+  }
 
   // Get sites to keep.
-  std::set<std::tuple<ChromosomeLabel, u_int32_t, char, std::vector<char>>> incMap;
+  std::set<std::pair<ChromosomeLabel, u_int32_t>> incMap;
   if (!config.getIncludedSitesFileName().empty())
-    readInclusionVCF(config.getIncludedSitesFileName(), incMap);
+  {
+    std::cout << "> Reading sites to be included... ";
+    readSpecialSites(config.getIncludedSitesFileName(), incMap);
+    std::cout << "Done. " << incMap.size() << " sites will be included." << std::endl;
+  }
+
+  // Get mutated sites to keep.
+  std::set<std::tuple<ChromosomeLabel, u_int32_t, char, char>> incMuMap;
+  if (!config.getIncludedMutatedSitesFileName().empty())
+    readInclusionVCF(config.getIncludedMutatedSitesFileName(), incMuMap);
 
   // Estimate effective error rate if necessary using multithreading.
   if (config.isEstimateErrRate())
@@ -106,6 +123,7 @@ void process_data(Config &config)
         std::ref(normalBulkPos),
         std::ref(exMap),
         std::ref(incMap),
+        std::ref(incMuMap),
         std::ref(dataMutex),
         std::ref(data)
     );
@@ -225,15 +243,13 @@ void readCellNames(const Config & config, Data & data)
 }
 
 /**
- * Get sites which will be excluded.
+ * Get sites which will be treated specially (excluded or included).
  */
-void readExclusionList(
+void readSpecialSites(
     const std::string &v,
     std::set<std::pair<ChromosomeLabel, u_int32_t>> &_map
     )
 {
-  std::cout << "> Reading sites to be excluded... ";
-
   std::ifstream inputStream(v);
   if (!inputStream)
     throw std::runtime_error("Error: Could not open " + v);
@@ -255,8 +271,6 @@ void readExclusionList(
           );
     }
   }
-
-  std::cout << "Done. " << _map.size() << " sites will be excluded." << std::endl;
 }
 
 /**
@@ -264,7 +278,7 @@ void readExclusionList(
  */
 void readInclusionVCF(
     const std::string &v,
-    std::set<std::tuple<ChromosomeLabel, u_int32_t, char, std::vector<char>>> &_map
+    std::set<std::tuple<ChromosomeLabel, u_int32_t, char, char>> &_map
 )
 {
   std::cout << "> Reading sites to be included... ";
@@ -285,14 +299,17 @@ void readInclusionVCF(
       if (splitVec[3].size() != 1)
         throw std::runtime_error("Error: Illegal format of reference nucleotide: " + splitVec[3]);
 
-      _map.emplace(
-          std::make_tuple(
-              std::move(ChromosomeLabel(std::move(splitVec[0]))),
-              std::stoi(splitVec[1]),
-              splitVec[3][0],
-              std::move(std::vector<char>(splitVec[4].begin(), splitVec[4].end()))
-              )
-          );
+      for (auto i: splitVec[4])
+      {
+        _map.emplace(
+            std::make_tuple(
+                std::move(ChromosomeLabel(std::move(splitVec[0]))),
+                std::stoi(splitVec[1]),
+                splitVec[3][0],
+                i
+                )
+        );
+      }
     }
   }
 
@@ -862,7 +879,8 @@ void process_single_file(
     const u_int32_t &tumorBulkPos,
     const u_int32_t &normalBulkPos,
     const std::set<std::pair<ChromosomeLabel, u_int32_t>> &exMap,
-    const std::set<std::tuple<ChromosomeLabel, u_int32_t, char, std::vector<char>>> &incMap,
+    const std::set<std::pair<ChromosomeLabel, u_int32_t>> &incMap,
+    const std::set<std::tuple<ChromosomeLabel, u_int32_t, char, char>> &incMuMap,
     std::mutex &_mutex,
     Data &data
     )
@@ -877,7 +895,7 @@ void process_single_file(
   std::array<u_int16_t, 3> altNucs{};
   u_int16_t altNucIdx{};
   ContinuousNoiseCounts continuousNoiseCounts{};
-  bool hasSignificantAltNucs;
+  bool positionKept, positionMutated, hasSignificantAltNucs;
 
   std::array<u_int32_t, 5> normalBulkCounts{};
 
@@ -922,6 +940,8 @@ void process_single_file(
 
     significantAltNucs.resetSigAltNucs();
     altNucIdx = 0;
+    positionKept = false;
+    positionMutated = false;
     hasSignificantAltNucs = false;
     cellReadCounts.clear();
 
@@ -932,15 +952,37 @@ void process_single_file(
       continue;
 
     // check if the current pos is to be excluded
-    auto it = exMap.find(
+    auto exIt = exMap.find(
         std::make_pair(
             std::move(ChromosomeLabel(splitVec[0])),
             std::stoi(splitVec[1])
             )
         );
 
-    if (it == exMap.end())
+    // check if the current pos is to be included
+    auto incIt = incMap.find(
+        std::make_pair(
+            std::move(ChromosomeLabel(splitVec[0])),
+            std::stoi(splitVec[1])
+                )
+    );
+
+    if (exIt != exMap.end() && incIt != incMap.end())
     {
+      std::cerr << splitVec[0] << "'s " << splitVec[1] << " appears both in " <<
+          config.getExcludedSitesFileName() << " and " <<
+          config.getIncludedSitesFileName() << "." << std::endl;
+      exit(1);
+    }
+    else if (exIt != exMap.end())
+    {
+      continue;
+    }
+    else
+    {
+      if (incIt != incMap.end())
+        positionKept = true;
+
       if (normalBulkPos != UINT_MAX)
       {
         extractSeqInformation(normalBulkCounts, splitVec, normalBulkPos);
@@ -961,8 +1003,8 @@ void process_single_file(
       filteredCounts = counts;
       applyCoverageFilterPerCell(filteredCounts, config);
 
-      bool positionMutated = false;
-      for (size_t altAlleleIdx = 0; altAlleleIdx < 4; ++altAlleleIdx) {
+      for (size_t altAlleleIdx = 0; altAlleleIdx < 4; ++altAlleleIdx)
+      {
         if (altAlleleIdx == charToIndex(splitVec[2][0]))
           continue;
 
@@ -1029,7 +1071,9 @@ void process_single_file(
         {
           logH1 = -DBL_MAX;
           logH0 = DBL_MAX;
-        } else {
+        }
+        else
+        {
           logH0 =
               sumValuesInLogSpace(
                   logProbTempValues.begin(),
@@ -1042,11 +1086,12 @@ void process_single_file(
         }
 
         if (logH1 > logH0 ||
-            incMap.count(
+            incMuMap.count(
                 std::make_tuple(
                     std::move(ChromosomeLabel(splitVec[0])),
-                    std::stoi(splitVec[1]), splitVec[2][0],
-                    std::move(std::vector<char>(indexToChar(altAlleleIdx)))
+                    std::stoi(splitVec[1]),
+                    splitVec[2][0],
+                    indexToChar(altAlleleIdx)
                     )
                 ) != 0
             )
@@ -1099,11 +1144,11 @@ void process_single_file(
 
           if (pValue > 0.05 ||
               startingPointMeanOverDis(0) >= config.getMeanFreqSite() ||
-              incMap.count(
+              incMuMap.count(
                   std::make_tuple(std::move(ChromosomeLabel(splitVec[0])),
                                   std::stoi(splitVec[1]), splitVec[2][0],
-                                  std::move(std::vector<char>(
-                                      indexToChar(altAlleleIdx))))) != 0)
+                                  indexToChar(altAlleleIdx))
+                  ) != 0)
           {
             hasSignificantAltNucs = true;
             significantAltNucs.addSigAltNuc(SignificantAltNuc(
@@ -1118,8 +1163,8 @@ void process_single_file(
               counts[cell][altNucs[0]], counts[cell][altNucs[1]],
               counts[cell][altNucs[2]], counts[cell][4]});
 
-      // only treat the site as a candidate snv if it contains significant alternative nucleotides
-      if (hasSignificantAltNucs)
+      // only treat the site as a candidate snv if it contains significant alternative nucleotides, or if it must be kept
+      if (hasSignificantAltNucs || positionKept)
       {
         // sort significant alternative nucleotides
         significantAltNucs.getOrderedSigAltNucs();
