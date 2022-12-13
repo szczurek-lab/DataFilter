@@ -436,7 +436,7 @@ void NoiseCounts::collectCounts(
 {
   for (size_t i = 0; i < val.size(); i++) {
     if (val[i] > 0) {
-      vec.emplace_back(std::make_pair(i, val[i]));
+      vec.emplace_back(i, val[i]);
 
       if (numPos != nullptr)
         (*numPos) += val[i];
@@ -451,11 +451,13 @@ std::ostream &operator<<(
     const NoiseCounts &v
     )
 {
-  NoiseCounts::printHelper(out, v.m1) << "\n";
-  NoiseCounts::printHelper(out, v.m2) << "\n";
-  NoiseCounts::printHelper(out, v.m3) << "\n";
-  NoiseCounts::printHelper(out, v.ref) << "\n";
-  NoiseCounts::printHelper(out, v.cov) << "\n";
+  if (v.numPos > 0) {
+    NoiseCounts::printHelper(out, v.m1) << "\n";
+    NoiseCounts::printHelper(out, v.m2) << "\n";
+    NoiseCounts::printHelper(out, v.m3) << "\n";
+    NoiseCounts::printHelper(out, v.ref) << "\n";
+    NoiseCounts::printHelper(out, v.cov) << "\n";
+  }
 
   return out;
 }
