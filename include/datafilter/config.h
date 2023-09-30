@@ -10,7 +10,7 @@
 #include <vector>
 #include <filesystem>
 
-#include "output_data.h"
+#include <datafilter/output_data.h>
 
 // Non-greedy pattern that only the very last `.` and everything on the right till the end will be found.
 #define SUFFIX_PATTERN "\\..*?$"

@@ -10,8 +10,11 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
 
-#include "process_data.h"
-#include "probabilities.h"
+#include <datafilter/config.h>
+#include <datafilter/thread_pool.h>
+#include <datafilter/output_data.h>
+#include <datafilter/process_data.h>
+#include <datafilter/probabilities.h>
 
 void process_data(Config &config)
 {

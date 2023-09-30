@@ -5,11 +5,11 @@
 #ifndef DATAFILTER_DATAFILTER_H
 #define DATAFILTER_DATAFILTER_H
 
-#include "config.h"
-#include "output_data.h"
-#include "probabilities.h"
-#include "process_data.h"
-#include "read_counts_file.h"
-#include "thread_pool.h"
+#include <datafilter/config.h>
+#include <datafilter/output_data.h>
+#include <datafilter/probabilities.h>
+#include <datafilter/process_data.h>
+#include <datafilter/read_counts_file.h>
+#include <datafilter/thread_pool.h>
 
 #endif //DATAFILTER_DATAFILTER_H

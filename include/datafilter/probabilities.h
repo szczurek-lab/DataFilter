@@ -8,6 +8,7 @@
 #include <dlib/matrix.h>
 #include <numeric>
 
+#include <datafilter/config.h>
 
 double logBetaBinCountsTerm(
     double sup,

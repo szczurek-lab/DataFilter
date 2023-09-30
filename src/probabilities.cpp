@@ -3,11 +3,10 @@
 //
 
 #include <cmath>
-#include <config.h>
 
 #include <boost/math/special_functions/digamma.hpp>
 
-#include "probabilities.h"
+#include <datafilter/probabilities.h>
 
 double logBetaBinCountsTerm(
     double sup,

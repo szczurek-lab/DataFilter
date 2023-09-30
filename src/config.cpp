@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 #include <fstream>
 
-#include "config.h"
+#include <datafilter/config.h>
 
 Config::Config(
     u_int16_t threads,

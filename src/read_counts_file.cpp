@@ -2,9 +2,9 @@
 // Created by senbaikang on 19.05.21.
 //
 
-#include "read_counts_file.h"
-
 #include <algorithm>
+
+#include <datafilter/read_counts_file.h>
 
 ReadCountsFile::ReadCountsFile(std::string v):
     fileName(std::move(v)),

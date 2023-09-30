@@ -2,7 +2,7 @@
 // Created by senbaikang on 15.05.21.
 //
 
-#include "output_data.h"
+#include <datafilter/output_data.h>
 
 SignificantAltNuc::SignificantAltNuc(
     u_int16_t sigAltNuc,

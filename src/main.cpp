@@ -1,4 +1,4 @@
-#include "datafilter.h"
+#include <datafilter/datafilter.h>
 
 int main(int argc, char* argv[])
 {

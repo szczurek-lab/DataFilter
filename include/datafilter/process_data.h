@@ -8,9 +8,8 @@
 #include <set>
 #include <vector>
 
-#include "config.h"
-#include "read_counts_file.h"
-#include "thread_pool.h"
+#include <datafilter/config.h>
+#include <datafilter/read_counts_file.h>
 
 #define GZ_FILE_PATTERN ".*?\\.gz$"
 
