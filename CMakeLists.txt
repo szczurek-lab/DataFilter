@@ -29,6 +29,10 @@ else()
     find_package(Threads REQUIRED)
     include_directories(${Boost_INCLUDE_DIRS})
     include_directories(${ZLIB_INCLUDE_DIRS})
+
+#    set(BLA_VENDER OpenBLAS)
+    find_package(BLAS REQUIRED)
+    include_directories(${BLAS_INCLUDE_DIRS})
 endif()
 
 # Include header files of this project.
@@ -70,8 +74,8 @@ if(USE_CONAN)
     target_link_libraries(${PROJECT_NAME}_shared PUBLIC ${CONAN_LIBS})
     target_link_libraries(${PROJECT_NAME}_static PUBLIC ${CONAN_LIBS})
 else()
-    target_link_libraries(${PROJECT_NAME}_shared PUBLIC dlib::dlib ZLIB::ZLIB ${Boost_LIBRARIES})
-    target_link_libraries(${PROJECT_NAME}_static PUBLIC dlib::dlib ZLIB::ZLIB ${Boost_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME}_shared PUBLIC dlib::dlib ZLIB::ZLIB ${Boost_LIBRARIES} ${BLAS_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME}_static PUBLIC dlib::dlib ZLIB::ZLIB ${Boost_LIBRARIES} ${BLAS_LIBRARIES})
 endif()
 
 if (UNIX AND NOT APPLE)
