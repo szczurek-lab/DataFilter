@@ -6,11 +6,10 @@
 
 #include <datafilter/read_counts_file.h>
 
-ReadCountsFile::ReadCountsFile(std::string v):
-    fileName(std::move(v)),
-    status(false),
-    clearCache(false)
-{}
+ReadCountsFile::ReadCountsFile(std::string v) :
+        fileName(std::move(v)),
+        status(false),
+        clearCache(false) {}
 
 ReadCountsFile::operator bool() const { return status; }
 
@@ -20,10 +19,9 @@ const std::string &ReadCountsFile::getFileName() const { return fileName; }
 
 void ReadCountsFile::setClearCache(bool val) { clearCache = val; }
 
-MPileupFile::MPileupFile(std::string v):
-    ReadCountsFile(std::move(v)),
-    iStream(fileName, std::ifstream::in)
-{
+MPileupFile::MPileupFile(std::string v) :
+        ReadCountsFile(std::move(v)),
+        iStream(fileName, std::ifstream::in) {
   clearCache = false;
   if (!iStream)
     throw std::runtime_error("Error: Could not open input file " + fileName);
@@ -31,15 +29,13 @@ MPileupFile::MPileupFile(std::string v):
 
 MPileupFile::~MPileupFile() { iStream.close(); }
 
-void MPileupFile::rewind()
-{
+void MPileupFile::rewind() {
   iStream.clear();
   iStream.seekg(0);
   status = true;
 }
 
-bool MPileupFile::getLine(std::string &line)
-{
+bool MPileupFile::getLine(std::string &line) {
   getline(iStream, line);
 
   updateStatus();
@@ -52,16 +48,15 @@ bool MPileupFile::isGood() const { return iStream.good(); }
 
 bool MPileupFile::isEOF() const { return iStream.eof(); }
 
-GZFile::GZFile(std::string v, u_int64_t l):
-    ReadCountsFile(std::move(v)),
-    errorCode(Z_OK),
-    eof(false)
-{
+GZFile::GZFile(std::string v, u_int64_t l) :
+        ReadCountsFile(std::move(v)),
+        errorCode(Z_OK),
+        eof(false) {
   clearCache = false;
   readLength = l;
   byteContent = new char[l]();
 
-  file = (gzFile)gzopen(fileName.c_str(), "rb");
+  file = (gzFile) gzopen(fileName.c_str(), "rb");
 
   if (file == nullptr)
     throw std::runtime_error("Error: Could not open input file " + fileName);
@@ -69,14 +64,12 @@ GZFile::GZFile(std::string v, u_int64_t l):
   gzrewind(file);
 }
 
-GZFile::~GZFile()
-{
+GZFile::~GZFile() {
   gzclose(file);
   delete[] byteContent;
 }
 
-void GZFile::rewind()
-{
+void GZFile::rewind() {
   cache.clear();
   cache.seekg(0);
   startPoint = 0;
@@ -86,21 +79,16 @@ void GZFile::rewind()
   status = true;
 }
 
-bool GZFile::getLine(std::string &line)
-{
+bool GZFile::getLine(std::string &line) {
   line.clear();
   const u_int64_t tmpStartPoint = cache.str().find_first_of('\n', startPoint);
-  if (tmpStartPoint != std::string::npos)
-  {
+  if (tmpStartPoint != std::string::npos) {
     startPoint = tmpStartPoint + 1;
     getline(cache, line);
 
     return true;
-  }
-  else
-  {
-    if (clearCache)
-    {
+  } else {
+    if (clearCache) {
       getline(cache, line);
       cache.clear();
       cache.seekg(0);
@@ -125,8 +113,7 @@ bool GZFile::getLine(std::string &line)
   }
 }
 
-void GZFile::updateStatus()
-{
+void GZFile::updateStatus() {
   const char *errMsg = gzerror(file, &errorCode);
 
   if (errorCode < 0)

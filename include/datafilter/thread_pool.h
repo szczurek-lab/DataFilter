@@ -15,41 +15,40 @@
 class ThreadPool {
 
 private:
-  std::vector<std::thread> threads;
-  std::queue<std::packaged_task<void()>> taskQueue;
+    std::vector<std::thread> threads;
+    std::queue<std::packaged_task<void()>> taskQueue;
 
-  // Synchronization.
-  std::mutex queueMutex;
-  std::condition_variable job;
-  std::condition_variable monitor;
-  u_int32_t busy;
-  u_int32_t processed;
-  bool stop;
+    // Synchronization.
+    std::mutex queueMutex;
+    std::condition_variable job;
+    std::condition_variable monitor;
+    u_int32_t busy;
+    u_int32_t processed;
+    bool stop;
 
 public:
-  ThreadPool();
-  explicit ThreadPool(const u_int16_t &);
+    ThreadPool();
 
-  ~ThreadPool();
+    explicit ThreadPool(const u_int16_t &);
 
-  template <class F, class... Args>
-  decltype(auto) addTask(F &&, Args &&...);
+    ~ThreadPool();
 
-  u_int32_t waitUntilFinished();
+    template<class F, class... Args>
+    decltype(auto) addTask(F &&, Args &&...);
+
+    u_int32_t waitUntilFinished();
 
 };
 
 inline
-ThreadPool::ThreadPool():
-    ThreadPool(1)
-{}
+ThreadPool::ThreadPool() :
+        ThreadPool(1) {}
 
 inline
-ThreadPool::ThreadPool(const u_int16_t &t):
-    busy(0),
-    processed(0),
-    stop(false)
-{
+ThreadPool::ThreadPool(const u_int16_t &t) :
+        busy(0),
+        processed(0),
+        stop(false) {
   const u_int16_t providedThreadNum = t == 0 ? 1 : t;
 
   const u_int16_t _maxThreadNum = std::thread::hardware_concurrency();
@@ -57,48 +56,43 @@ ThreadPool::ThreadPool(const u_int16_t &t):
 
   const u_int16_t &threadNum = std::min(providedThreadNum, maxThreadNum);
 
-  for (u_int16_t i = 0; i < threadNum; i++)
-  {
+  for (u_int16_t i = 0; i < threadNum; i++) {
     threads.emplace_back(
-        [this]()
-        {
-          for(;;)
-          {
-            std::packaged_task<void()> task;
+            [this]() {
+                for (;;) {
+                  std::packaged_task<void()> task;
 
-            std::unique_lock<std::mutex> lock(queueMutex);
+                  std::unique_lock<std::mutex> lock(queueMutex);
 
-            job.wait(
-                lock,
-                [&]()
-                {
-                  return stop || !taskQueue.empty();
+                  job.wait(
+                          lock,
+                          [&]() {
+                              return stop || !taskQueue.empty();
+                          }
+                  );
+
+                  if (stop && taskQueue.empty())
+                    break;
+
+                  ++busy;
+                  task = std::move(taskQueue.front());
+                  taskQueue.pop();
+                  lock.unlock();
+
+                  task();
+
+                  lock.lock();
+                  ++processed;
+                  --busy;
+                  monitor.notify_one();
                 }
-                );
-
-            if (stop && taskQueue.empty())
-              break;
-
-            ++busy;
-            task = std::move(taskQueue.front());
-            taskQueue.pop();
-            lock.unlock();
-
-            task();
-
-            lock.lock();
-            ++processed;
-            --busy;
-            monitor.notify_one();
-          }
-        }
-        );
+            }
+    );
   }
 }
 
 inline
-ThreadPool::~ThreadPool()
-{
+ThreadPool::~ThreadPool() {
   {
     std::unique_lock<std::mutex> lock(queueMutex);
     stop = true;
@@ -106,18 +100,17 @@ ThreadPool::~ThreadPool()
 
   job.notify_all();
 
-  for (std::thread & i : threads)
+  for (std::thread &i: threads)
     i.join();
 }
 
-template <class F, class... Args>
-decltype(auto) ThreadPool::addTask(F &&f, Args &&...args)
-{
+template<class F, class... Args>
+decltype(auto) ThreadPool::addTask(F &&f, Args &&...args) {
   using return_type = decltype(f(args...));
 
-  std::packaged_task<return_type()> task (
-      std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-      );
+  std::packaged_task<return_type()> task(
+          std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+  );
 
   std::future<return_type> ret = task.get_future();
 
@@ -136,16 +129,15 @@ decltype(auto) ThreadPool::addTask(F &&f, Args &&...args)
 }
 
 inline
-u_int32_t ThreadPool::waitUntilFinished()
-{
+u_int32_t ThreadPool::waitUntilFinished() {
   std::unique_lock<std::mutex> lock(queueMutex);
 
   monitor.wait(
-      lock,
-      [this]() {
-        return busy == 0 && taskQueue.empty();
-      }
- );
+          lock,
+          [this]() {
+              return busy == 0 && taskQueue.empty();
+          }
+  );
 
   return processed;
 }

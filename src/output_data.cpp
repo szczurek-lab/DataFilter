@@ -5,16 +5,15 @@
 #include <datafilter/output_data.h>
 
 SignificantAltNuc::SignificantAltNuc(
-    u_int16_t sigAltNuc,
-    double mean,
-    double pValue
-    ):
-    sigAltNuc(sigAltNuc),
-    mean(mean),
-    pValue(pValue)
-{}
+        u_int16_t sigAltNuc,
+        double mean,
+        double pValue
+) :
+        sigAltNuc(sigAltNuc),
+        mean(mean),
+        pValue(pValue) {}
 
-bool SignificantAltNuc::operator > (const SignificantAltNuc &v) const {
+bool SignificantAltNuc::operator>(const SignificantAltNuc &v) const {
   if (getMean() != v.getMean())
     return getMean() > v.getMean();
 
@@ -31,14 +30,11 @@ double SignificantAltNuc::getMean() const { return mean; }
 double SignificantAltNuc::getPValue() const { return pValue; }
 
 SignificantAltNucs::SignificantAltNucs(SignificantAltNucs &&v) noexcept:
-    sigAltNucs(std::move(v.sigAltNucs)),
-    orderedSigAltNucs(std::move(v.orderedSigAltNucs))
-{}
+        sigAltNucs(std::move(v.sigAltNucs)),
+        orderedSigAltNucs(std::move(v.orderedSigAltNucs)) {}
 
-SignificantAltNucs & SignificantAltNucs::operator = (SignificantAltNucs &&v) noexcept
-{
-  if (this != &v)
-  {
+SignificantAltNucs &SignificantAltNucs::operator=(SignificantAltNucs &&v) noexcept {
+  if (this != &v) {
     sigAltNucs = std::move(v.sigAltNucs);
     orderedSigAltNucs = std::move(v.orderedSigAltNucs);
   }
@@ -46,12 +42,11 @@ SignificantAltNucs & SignificantAltNucs::operator = (SignificantAltNucs &&v) noe
   return *this;
 }
 
-void SignificantAltNucs::addSigAltNuc(const SignificantAltNuc & v) { sigAltNucs.emplace_back(v); }
+void SignificantAltNucs::addSigAltNuc(const SignificantAltNuc &v) { sigAltNucs.emplace_back(v); }
 
 void SignificantAltNucs::addSigAltNuc(SignificantAltNuc &&v) { sigAltNucs.emplace_back(v); }
 
-void SignificantAltNucs::getOrderedSigAltNucs()
-{
+void SignificantAltNucs::getOrderedSigAltNucs() {
   if (this->sigAltNucs.empty()) return;
 
   std::sort(sigAltNucs.begin(), sigAltNucs.end(), std::greater<>());
@@ -61,8 +56,7 @@ void SignificantAltNucs::getOrderedSigAltNucs()
     this->orderedSigAltNucs[i] = sigAltNucs[i].getSigAltNuc();
 }
 
-int16_t SignificantAltNucs::getAltNucOrder(const u_int16_t & v) const
-{
+int16_t SignificantAltNucs::getAltNucOrder(const u_int16_t &v) const {
   for (int16_t i = 0; i < orderedSigAltNucs.size(); i++)
     if (v == orderedSigAltNucs[i])
       return i;
@@ -70,35 +64,30 @@ int16_t SignificantAltNucs::getAltNucOrder(const u_int16_t & v) const
   return -1;
 }
 
-void SignificantAltNucs::resetSigAltNucs()
-{
+void SignificantAltNucs::resetSigAltNucs() {
   sigAltNucs.clear();
   orderedSigAltNucs.clear();
 }
 
 AltNucReadCount::AltNucReadCount(AltNucReadCount &&v) noexcept:
-    altNuc(v.altNuc),
-    altNucChar(v.altNucChar),
-    readCount(v.readCount),
-    sigAltNucs(std::move(v.sigAltNucs))
-{}
+        altNuc(v.altNuc),
+        altNucChar(v.altNucChar),
+        readCount(v.readCount),
+        sigAltNucs(std::move(v.sigAltNucs)) {}
 
 AltNucReadCount::AltNucReadCount(
-    u_int16_t altNuc,
-    char aluNucChar,
-    u_int32_t readCount,
-    SignificantAltNucs sigAltNucs
-    ):
+        u_int16_t altNuc,
+        char aluNucChar,
+        u_int32_t readCount,
+        SignificantAltNucs sigAltNucs
+) :
         altNuc(altNuc),
         altNucChar(aluNucChar),
         readCount(readCount),
-        sigAltNucs(std::move(sigAltNucs))
-{}
+        sigAltNucs(std::move(sigAltNucs)) {}
 
-AltNucReadCount & AltNucReadCount::operator = (AltNucReadCount &&v) noexcept
-{
-  if (this != &v)
-  {
+AltNucReadCount &AltNucReadCount::operator=(AltNucReadCount &&v) noexcept {
+  if (this != &v) {
     altNuc = v.altNuc;
     altNucChar = v.altNucChar;
     readCount = v.readCount;
@@ -108,8 +97,7 @@ AltNucReadCount & AltNucReadCount::operator = (AltNucReadCount &&v) noexcept
   return *this;
 }
 
-bool AltNucReadCount::operator > (const AltNucReadCount & v) const
-{
+bool AltNucReadCount::operator>(const AltNucReadCount &v) const {
   if (readCount != v.readCount)
     return readCount > v.readCount;
 
@@ -135,17 +123,15 @@ u_int32_t AltNucReadCount::getReadCount() const { return readCount; }
 const SignificantAltNucs &AltNucReadCount::getSigAltNucs() const { return sigAltNucs; }
 
 CellReadCounts::CellReadCounts(CellReadCounts &&v) noexcept:
-    altNucReadCounts(std::move(v.altNucReadCounts)),
-    cov(v.cov)
-{}
+        altNucReadCounts(std::move(v.altNucReadCounts)),
+        cov(v.cov) {}
 
 CellReadCounts::CellReadCounts(
-    const AltNucReadCount &v1,
-    const AltNucReadCount &v2,
-    const AltNucReadCount &v3,
-    u_int32_t _cov
-)
-{
+        const AltNucReadCount &v1,
+        const AltNucReadCount &v2,
+        const AltNucReadCount &v3,
+        u_int32_t _cov
+) {
   altNucReadCounts[0] = v1;
   altNucReadCounts[1] = v2;
   altNucReadCounts[2] = v3;
@@ -153,22 +139,19 @@ CellReadCounts::CellReadCounts(
 }
 
 CellReadCounts::CellReadCounts(
-    AltNucReadCount &&v1,
-    AltNucReadCount &&v2,
-    AltNucReadCount &&v3,
-    u_int32_t _cov
-) noexcept
-{
+        AltNucReadCount &&v1,
+        AltNucReadCount &&v2,
+        AltNucReadCount &&v3,
+        u_int32_t _cov
+) noexcept {
   altNucReadCounts[0] = std::move(v1);
   altNucReadCounts[1] = std::move(v2);
   altNucReadCounts[2] = std::move(v3);
   cov = _cov;
 }
 
-CellReadCounts & CellReadCounts::operator = (CellReadCounts &&v) noexcept
-{
-  if (this != &v)
-  {
+CellReadCounts &CellReadCounts::operator=(CellReadCounts &&v) noexcept {
+  if (this != &v) {
     altNucReadCounts = std::move(v.altNucReadCounts);
     cov = v.cov;
   }
@@ -176,13 +159,11 @@ CellReadCounts & CellReadCounts::operator = (CellReadCounts &&v) noexcept
   return *this;
 }
 
-void CellReadCounts::sortAltNucReadCounts()
-{
+void CellReadCounts::sortAltNucReadCounts() {
   std::sort(altNucReadCounts.begin(), altNucReadCounts.end(), std::greater<>());
 }
 
-std::ostream & operator << (std::ostream & out, const CellReadCounts & v)
-{
+std::ostream &operator<<(std::ostream &out, const CellReadCounts &v) {
   out << v.altNucReadCounts[0].getAltNucChar() << ","
       << v.altNucReadCounts[1].getAltNucChar() << ","
       << v.altNucReadCounts[2].getAltNucChar() << ";";
@@ -210,24 +191,19 @@ std::string ChromosomeLabel::getLabel(const std::string &v) {
 }
 
 ChromosomeLabel::ChromosomeLabel(ChromosomeLabel &&v) noexcept:
-    fullLabel(std::move(v.fullLabel)),
-    label(std::move(v.label))
-{}
+        fullLabel(std::move(v.fullLabel)),
+        label(std::move(v.label)) {}
 
-ChromosomeLabel::ChromosomeLabel(const std::string &v):
-    fullLabel(v),
-    label(getLabel(v))
-{}
+ChromosomeLabel::ChromosomeLabel(const std::string &v) :
+        fullLabel(v),
+        label(getLabel(v)) {}
 
 ChromosomeLabel::ChromosomeLabel(std::string &&v) noexcept:
-    fullLabel(std::move(v)),
-    label(getLabel(fullLabel))
-{}
+        fullLabel(std::move(v)),
+        label(getLabel(fullLabel)) {}
 
-ChromosomeLabel & ChromosomeLabel::operator = (ChromosomeLabel &&v) noexcept
-{
-  if (this != &v)
-  {
+ChromosomeLabel &ChromosomeLabel::operator=(ChromosomeLabel &&v) noexcept {
+  if (this != &v) {
     fullLabel = std::move(v.fullLabel);
     label = std::move(v.label);
   }
@@ -235,44 +211,36 @@ ChromosomeLabel & ChromosomeLabel::operator = (ChromosomeLabel &&v) noexcept
   return *this;
 }
 
-bool ChromosomeLabel::operator == (const ChromosomeLabel &v) const
-{
+bool ChromosomeLabel::operator==(const ChromosomeLabel &v) const {
   return label == v.label;
 }
 
-bool ChromosomeLabel::operator != (const ChromosomeLabel &v) const
-{
+bool ChromosomeLabel::operator!=(const ChromosomeLabel &v) const {
   return label != v.label;
 }
 
-bool ChromosomeLabel::operator > (const ChromosomeLabel &v) const
-{
+bool ChromosomeLabel::operator>(const ChromosomeLabel &v) const {
   u_int16_t i, i1;
 
-  try
-  {
+  try {
     i = std::stoi(label);
     i1 = std::stoi(v.label);
   }
-  catch (std::invalid_argument &_v)
-  {
+  catch (std::invalid_argument &_v) {
     return label > v.label;
   }
 
   return i > i1;
 }
 
-bool ChromosomeLabel::operator < (const ChromosomeLabel &v) const
-{
+bool ChromosomeLabel::operator<(const ChromosomeLabel &v) const {
   u_int16_t i, i1;
 
-  try
-  {
+  try {
     i = std::stoi(label);
     i1 = std::stoi(v.label);
   }
-  catch (std::invalid_argument &_v)
-  {
+  catch (std::invalid_argument &_v) {
     return label < v.label;
   }
 
@@ -281,17 +249,15 @@ bool ChromosomeLabel::operator < (const ChromosomeLabel &v) const
 
 std::string ChromosomeLabel::getFullLabel() const { return fullLabel; }
 
-std::ostream & operator << (std::ostream & out, const ChromosomeLabel &v)
-{
+std::ostream &operator<<(std::ostream &out, const ChromosomeLabel &v) {
   out << v.fullLabel;
   return out;
 }
 
 void ContinuousNoiseCounts::add(
-    std::vector<u_int64_t> &vec,
-    size_t val
-    )
-{
+        std::vector<u_int64_t> &vec,
+        size_t val
+) {
   if (val >= vec.size())
     vec.resize(val + 1, 0);
 
@@ -299,18 +265,16 @@ void ContinuousNoiseCounts::add(
 }
 
 void ContinuousNoiseCounts::alignSize(
-    std::vector<u_int64_t> &v1,
-    std::vector<u_int64_t> &v2
-    )
-{
+        std::vector<u_int64_t> &v1,
+        std::vector<u_int64_t> &v2
+) {
   if (v1.size() < v2.size())
     v1.resize(v2.size(), 0);
   else if (v1.size() > v2.size())
     v2.resize(v1.size(), 0);
 }
 
-void ContinuousNoiseCounts::alignSize(ContinuousNoiseCounts &v)
-{
+void ContinuousNoiseCounts::alignSize(ContinuousNoiseCounts &v) {
   alignSize(m1, v.m1);
   alignSize(m2, v.m2);
   alignSize(m3, v.m3);
@@ -319,10 +283,9 @@ void ContinuousNoiseCounts::alignSize(ContinuousNoiseCounts &v)
 }
 
 void ContinuousNoiseCounts::add(
-    std::vector<u_int64_t> &v1,
-    const std::vector<u_int64_t> &v2
-    )
-{
+        std::vector<u_int64_t> &v1,
+        const std::vector<u_int64_t> &v2
+) {
   std::transform(v1.begin(), v1.end(), v2.begin(), v1.begin(), std::plus<>());
 }
 
@@ -330,8 +293,7 @@ void ContinuousNoiseCounts::add(
  * Add each count to the corresponding vector.
  * @param counts first three members are read counts of alternative nucleotides, the fourth is coverage
  */
-void ContinuousNoiseCounts::add(std::array<u_int32_t , 4> &&counts)
-{
+void ContinuousNoiseCounts::add(std::array<u_int32_t, 4> &&counts) {
   std::sort(counts.begin(), counts.end() - 1, std::greater<>());
 
   add(m1, counts[0]);
@@ -353,36 +315,30 @@ ContinuousNoiseCounts &ContinuousNoiseCounts::operator+=(ContinuousNoiseCounts &
   return *this;
 }
 
-const std::vector<u_int64_t> &ContinuousNoiseCounts::getM1() const
-{
+const std::vector<u_int64_t> &ContinuousNoiseCounts::getM1() const {
   return m1;
 }
 
-const std::vector<u_int64_t> &ContinuousNoiseCounts::getM2() const
-{
+const std::vector<u_int64_t> &ContinuousNoiseCounts::getM2() const {
   return m2;
 }
 
-const std::vector<u_int64_t> &ContinuousNoiseCounts::getM3() const
-{
+const std::vector<u_int64_t> &ContinuousNoiseCounts::getM3() const {
   return m3;
 }
 
-const std::vector<u_int64_t> &ContinuousNoiseCounts::getRef() const
-{
+const std::vector<u_int64_t> &ContinuousNoiseCounts::getRef() const {
   return ref;
 }
 
-const std::vector<u_int64_t> &ContinuousNoiseCounts::getCov() const
-{
+const std::vector<u_int64_t> &ContinuousNoiseCounts::getCov() const {
   return cov;
 }
 
-std::ostream & NoiseCounts::printHelper(
-    std::ostream &out,
-    const std::vector<std::pair<size_t, u_int64_t>> &v
-)
-{
+std::ostream &NoiseCounts::printHelper(
+        std::ostream &out,
+        const std::vector<std::pair<size_t, u_int64_t>> &v
+) {
   out << v[0].first << "," << v[0].second;
 
   for (size_t i = 1; i < v.size(); i++)
@@ -391,8 +347,7 @@ std::ostream & NoiseCounts::printHelper(
   return out;
 }
 
-NoiseCounts::NoiseCounts(const ContinuousNoiseCounts &v)
-{
+NoiseCounts::NoiseCounts(const ContinuousNoiseCounts &v) {
   numPos = 0;
 
   collectCounts(m1, v.getM1(), nullptr);
@@ -402,8 +357,7 @@ NoiseCounts::NoiseCounts(const ContinuousNoiseCounts &v)
   collectCounts(cov, v.getCov(), &numPos);
 }
 
-NoiseCounts::NoiseCounts(NoiseCounts &&v) noexcept
-{
+NoiseCounts::NoiseCounts(NoiseCounts &&v) noexcept {
   m1 = std::move(v.m1);
   m2 = std::move(v.m2);
   m3 = std::move(v.m3);
@@ -413,8 +367,7 @@ NoiseCounts::NoiseCounts(NoiseCounts &&v) noexcept
   numPos = v.numPos;
 }
 
-NoiseCounts & NoiseCounts::operator = (NoiseCounts &&v) noexcept
-{
+NoiseCounts &NoiseCounts::operator=(NoiseCounts &&v) noexcept {
   if (this != &v) {
     m1 = std::move(v.m1);
     m2 = std::move(v.m2);
@@ -429,11 +382,10 @@ NoiseCounts & NoiseCounts::operator = (NoiseCounts &&v) noexcept
 }
 
 void NoiseCounts::collectCounts(
-    std::vector<std::pair<size_t, u_int64_t>> &vec,
-    const std::vector<u_int64_t> &val,
-    u_int64_t * const numPos
-    )
-{
+        std::vector<std::pair<size_t, u_int64_t>> &vec,
+        const std::vector<u_int64_t> &val,
+        u_int64_t *const numPos
+) {
   for (size_t i = 0; i < val.size(); i++) {
     if (val[i] > 0) {
       vec.emplace_back(i, val[i]);
@@ -447,10 +399,9 @@ void NoiseCounts::collectCounts(
 u_int64_t NoiseCounts::getBackgroundSitesNum() const { return numPos; }
 
 std::ostream &operator<<(
-    std::ostream &out,
-    const NoiseCounts &v
-    )
-{
+        std::ostream &out,
+        const NoiseCounts &v
+) {
   if (v.numPos > 0) {
     NoiseCounts::printHelper(out, v.m1) << "\n";
     NoiseCounts::printHelper(out, v.m2) << "\n";
@@ -462,13 +413,11 @@ std::ostream &operator<<(
   return out;
 }
 
-bool compareDataEntry(const TDataEntry &v1, const TDataEntry &v2)
-{
+bool compareDataEntry(const TDataEntry &v1, const TDataEntry &v2) {
   const auto &c1 = std::get<0>(std::get<0>(v1));
   const auto &c2 = std::get<0>(std::get<0>(v2));
 
-  if (c1 == c2)
-  {
+  if (c1 == c2) {
     const auto p1 = std::get<1>(std::get<0>(v1));
     const auto p2 = std::get<1>(std::get<0>(v2));
 
@@ -483,21 +432,18 @@ void Data::addCellName(const std::string &v) { cellNames.emplace_back(v); }
 void Data::addCellName(std::string &&v) { cellNames.emplace_back(std::move(v)); }
 
 void Data::addReadCounts(
-    const std::vector<std::pair<std::tuple<ChromosomeLabel, unsigned int, char, std::vector<char>>,std::vector<CellReadCounts>>> &v
-    )
-{
+        const std::vector<std::pair<std::tuple<ChromosomeLabel, unsigned int, char, std::vector<char>>, std::vector<CellReadCounts>>> &v
+) {
   std::copy(v.begin(), v.end(), std::back_inserter(readCounts));
 }
 
 void Data::addReadCounts(
-    std::vector<std::pair<std::tuple<ChromosomeLabel, unsigned int, char, std::vector<char>>,std::vector<CellReadCounts>>> &&v
-    )
-{
+        std::vector<std::pair<std::tuple<ChromosomeLabel, unsigned int, char, std::vector<char>>, std::vector<CellReadCounts>>> &&v
+) {
   std::move(v.begin(), v.end(), std::back_inserter(readCounts));
 }
 
-void Data::addContinuousNoiseCounts(ContinuousNoiseCounts &v)
-{
+void Data::addContinuousNoiseCounts(ContinuousNoiseCounts &v) {
   continuousNoiseCounts += v;
 }
 
@@ -505,13 +451,12 @@ void Data::createNoiseCounts() {
   noiseCounts = NoiseCounts(continuousNoiseCounts);
 }
 
-void Data::sortEntries()
-{
+void Data::sortEntries() {
   std::sort(
-      readCounts.begin(),
-      readCounts.end(),
-      compareDataEntry
-      );
+          readCounts.begin(),
+          readCounts.end(),
+          compareDataEntry
+  );
 }
 
 const std::vector<std::string> &Data::getCellNames() const { return cellNames; }

@@ -11,94 +11,104 @@
 #include <vector>
 #include <zlib.h>
 
-class ReadCountsFile
-{
+class ReadCountsFile {
 
 protected:
-  const std::string fileName;
+    const std::string fileName;
 
-  bool status;
+    bool status;
 
-  bool clearCache;
+    bool clearCache;
 
 public:
-  ReadCountsFile() = delete;
-  explicit ReadCountsFile(std::string);
-  ReadCountsFile(const ReadCountsFile &) = delete;
-  ReadCountsFile(ReadCountsFile &&) = delete;
+    ReadCountsFile() = delete;
 
-  virtual ~ReadCountsFile() = default;
+    explicit ReadCountsFile(std::string);
 
-  void setClearCache(bool val);
+    ReadCountsFile(const ReadCountsFile &) = delete;
 
-  virtual void rewind() = 0;
+    ReadCountsFile(ReadCountsFile &&) = delete;
 
-  virtual bool getLine(std::string &) = 0;
-  virtual void updateStatus() = 0;
+    virtual ~ReadCountsFile() = default;
 
-  [[nodiscard]] virtual bool isGood() const = 0;
-  [[nodiscard]] virtual bool isEOF() const = 0;
+    void setClearCache(bool val);
 
-  explicit operator bool() const;
-  bool operator !() const;
+    virtual void rewind() = 0;
 
-  [[nodiscard]] const std::string &getFileName() const;
+    virtual bool getLine(std::string &) = 0;
+
+    virtual void updateStatus() = 0;
+
+    [[nodiscard]] virtual bool isGood() const = 0;
+
+    [[nodiscard]] virtual bool isEOF() const = 0;
+
+    explicit operator bool() const;
+
+    bool operator!() const;
+
+    [[nodiscard]] const std::string &getFileName() const;
 
 };
 
 
-class MPileupFile: public ReadCountsFile
-{
+class MPileupFile : public ReadCountsFile {
 
 protected:
-  std::ifstream iStream;
+    std::ifstream iStream;
 
 public:
-  MPileupFile() = delete;
-  explicit MPileupFile(std::string);
-  ~MPileupFile() override;
+    MPileupFile() = delete;
 
-  void rewind() override;
+    explicit MPileupFile(std::string);
 
-  bool getLine(std::string &) override;
-  void updateStatus() override;
+    ~MPileupFile() override;
 
-  [[nodiscard]] bool isGood() const override;
-  [[nodiscard]] bool isEOF() const override;
+    void rewind() override;
+
+    bool getLine(std::string &) override;
+
+    void updateStatus() override;
+
+    [[nodiscard]] bool isGood() const override;
+
+    [[nodiscard]] bool isEOF() const override;
 
 };
 
 
-class GZFile: public ReadCountsFile
-{
+class GZFile : public ReadCountsFile {
 
 protected:
-  gzFile file;
-  int errorCode; // To receive the error code from ZLIB.
-  bool eof; // Whether reached the end of file.
+    gzFile file;
+    int errorCode; // To receive the error code from ZLIB.
+    bool eof; // Whether reached the end of file.
 
-  // Byte content read from the compressed input file.
-  char *byteContent;
-  u_int64_t readLength;
+    // Byte content read from the compressed input file.
+    char *byteContent;
+    u_int64_t readLength;
 
-  // Start point to search for the new line.
-  u_int64_t startPoint = 0;
+    // Start point to search for the new line.
+    u_int64_t startPoint = 0;
 
-  std::stringstream cache;
+    std::stringstream cache;
 
 public:
-  GZFile() = delete;
-  explicit GZFile(std::string, u_int64_t);
+    GZFile() = delete;
 
-  ~GZFile() override;
+    explicit GZFile(std::string, u_int64_t);
 
-  void rewind() override;
+    ~GZFile() override;
 
-  bool getLine(std::string &) override;
-  void updateStatus() override;
+    void rewind() override;
 
-  [[nodiscard]] bool isGood() const override;
-  [[nodiscard]] bool isEOF() const override;
+    bool getLine(std::string &) override;
+
+    void updateStatus() override;
+
+    [[nodiscard]] bool isGood() const override;
+
+    [[nodiscard]] bool isEOF() const override;
 
 };
 
