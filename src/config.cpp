@@ -20,6 +20,7 @@ Config::Config(
 
 Config::Config(
         u_int16_t threads,
+        double threshold,
         std::string cellNamesFileName,
         std::string cellNameSuffix,
         std::vector<std::string> inputFileNames,
@@ -47,6 +48,7 @@ Config::Config(
         u_int32_t maxNormalCellsToMutate
 ) :
         threads(threads),
+        threshold(threshold),
         cellNamesFileName(std::move(cellNamesFileName)),
         cellNameSuffix(std::move(cellNameSuffix)),
         inputFileNames(std::move(inputFileNames)),
@@ -74,6 +76,8 @@ Config::Config(
         maxNormalCellsToMutate(maxNormalCellsToMutate) {}
 
 u_int16_t Config::getThreads() const { return threads; }
+
+double Config::getThreshold() const { return threshold; };
 
 const std::string &Config::getCellNamesFileName() const { return cellNamesFileName; }
 

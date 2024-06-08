@@ -21,6 +21,10 @@ private:
 
     u_int16_t threads = 1;
 
+    // "thld"
+    // Threshold for the likelihood ratio test.
+    double threshold = 0.05;
+
     // "in"
     // Name of the BAM files used to create the mpileup, i.e., the names of single cells.
     std::string cellNamesFileName;
@@ -150,6 +154,7 @@ public:
 
     explicit Config(
             u_int16_t,
+            double,
             std::string,
             std::string,
             std::vector<std::string>,
@@ -178,6 +183,8 @@ public:
     );
 
     [[nodiscard]] u_int16_t getThreads() const;
+
+    [[nodiscard]] double getThreshold() const;
 
     [[nodiscard]] const std::string &getCellNamesFileName() const;
 

@@ -1061,7 +1061,7 @@ void process_single_file(
             pValue = 1 - boost::math::cdf(mydist, testStat);
           }
 
-          if (pValue > 0.05 ||
+          if (pValue > config.getThreshold() ||
               startingPointMeanOverDis(0) >= config.getMeanFreqSite() ||
               incMuMap.count(
                       std::make_tuple(std::move(ChromosomeLabel(splitVec[0])),
