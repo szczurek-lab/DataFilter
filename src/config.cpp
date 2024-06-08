@@ -77,7 +77,12 @@ Config::Config(
 
 u_int16_t Config::getThreads() const { return threads; }
 
-double Config::getThreshold() const { return threshold; };
+double Config::getThreshold() const {
+  if (threads > 0.0 && threads < 1.0)
+    return threshold;
+  else
+    return 0.05;
+};
 
 const std::string &Config::getCellNamesFileName() const { return cellNamesFileName; }
 
